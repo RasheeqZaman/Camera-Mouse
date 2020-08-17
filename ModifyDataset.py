@@ -20,8 +20,19 @@ def show_images(df, index):
         img = Image.fromarray(im_array, 'L')
 
         print(f'Index: {index+i} - Label: {label}')
-        plt.imshow(np.asarray(img))
+        plt.imshow(np.asarray(img), cmap='gray')
     plt.show()
+
+def save_images(df):
+    for i in range(len(df)):
+        label = df.values[i][0]
+        im_buf = df.values[i][1:]
+        axis_len = int(math.sqrt(im_buf.shape[0]))
+        im_array = np.int8(np.reshape(im_buf, (axis_len, axis_len)))
+        img = Image.fromarray(im_array, 'L')
+
+        img.save("dataset/camera_mouse_images/image"+str(i)+"label"+str(label)+".jpg", "JPEG")
+        print(f'Index: {i} - Label: {label}')
 
 fist0 = df[df["label"].isin([0, 4, 12, 13, 14, 18])]
 fist0["label"].values[:] = 0
@@ -35,4 +46,5 @@ print(two_finger2.shape)
 df_hand_mouse = pd.concat([fist0[:3200], one_finger1[:3200], two_finger2[:3200]], ignore_index=True).sample(frac=1).reset_index(drop=True)
 
 show_images(df_hand_mouse, 0)
+save_images(df_hand_mouse)
 
