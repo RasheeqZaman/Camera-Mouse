@@ -30,10 +30,10 @@ log_dir = os.path.join(cwd, 'Logs')
 weights_path = os.path.join(log_dir, 'trained_weights_final.h5') 
 logging = TensorBoard(log_dir=log_dir)
 checkpoint = ModelCheckpoint(log_dir + 'ep{epoch:03d}-loss{loss:.3f}-val_loss{val_loss:.3f}.h5', 
-                             monitor='val_loss', save_weights_only=True, save_best_only=True, save_freq='epoch')
+                             monitor='val_loss', save_weights_only=True, save_best_only=True, save_freq='epoch', period=10)
 reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=3, verbose=1)
 early_stopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=1)
 
 optimizer = Adam(learning_rate=optimizer_learning_rate)
 
-nms_thresh = 0.5
+nms_thresh = 0.3

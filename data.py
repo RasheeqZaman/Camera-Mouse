@@ -9,14 +9,14 @@ from utils import get_data, preprocess_true_boxes
 
 def get_dataset(path, num_classes, image_extension):
     label_paths = sorted([os.path.join(path, o) for o in os.listdir(path) if os.path.isdir(os.path.join(path,o)) and o != '.ipynb_checkpoints'])
-    if num_classes != len(label_paths): return None
+    if num_classes+1 != len(label_paths): return None
 
     dataset = []
-    for i in range(num_classes):
+    for i in range(num_classes+1):
         for (root, _, filenames) in os.walk(label_paths[i]):
             for j in range(len(filenames)):
                 if filenames[j].endswith(image_extension):
-                    dataset.append((os.path.splitext(os.path.join(root, filenames[j]))[0], i))
+                    dataset.append((os.path.splitext(os.path.join(root, filenames[j]))[0], i-1))
 
     random.seed(10101)
     random.shuffle(dataset)

@@ -12,9 +12,11 @@ def get_classes(classes_path):
 
 
 def smooth_one_hot(class_id, num_classes, delta=0.99):
-  soh = np.zeros(num_classes)
-  soh[class_id] = delta
-  return np.array(soh, np.array([num_classes]).fill((1-delta)/num_classes)).sum(axis=0)
+  one_hot = np.zeros(num_classes)
+  one_hot[class_id] = delta
+  smooth = np.empty([num_classes]) 
+  smooth.fill((1-delta)/num_classes)
+  return np.array([one_hot, smooth]).sum(axis=0)
 
 
 def preprocess_true_boxes(true_boxes, input_shape, output_shapes, num_classes):
@@ -32,6 +34,7 @@ def preprocess_true_boxes(true_boxes, input_shape, output_shapes, num_classes):
       i = true_boxes[b,0]*output_shapes[l][0]
       j = true_boxes[b,1]*output_shapes[l][1]
       c = true_boxes[b,2].astype('int32')
+      if c == -1: continue
 
       y_true[l][b, int(j), int(i), 0] = i - float(int(i))
       y_true[l][b, int(j), int(i), 1] = j - float(int(j))
@@ -50,6 +53,10 @@ def get_data(data_line, input_shape, image_extension):
   image_data = preprocess_image(image, input_shape)
 
   box_data = np.zeros((3))
+  if data_line[1] == -1:
+    box_data[2] = -1
+    return image_data, box_data
+  
   with open(data_line[0]+'.txt') as f:
     box_file = f.readline()
   box_file_data = box_file.split()
@@ -87,25 +94,17 @@ class BoundBox:
 def draw_boxes(image, box, label_names):
   if box is None: return
 
-  label_colors = [(66, 181, 73), (255, 87, 34), (48, 148, 195)]
-
   label_index = box.get_label()
-  label_str = label_names[label_index]
+  label_str = str(label_index)+", "+"{:.2f}".format(box.objectness*100)+"%, "+"{:.2f}".format(box.get_score()*100)+"%"
 
-  text_size = cv2.getTextSize(label_str, cv2.FONT_HERSHEY_SIMPLEX, 1.1e-3 * image.size[0], 5)
-  text_width, text_height = text_size[0][0], text_size[0][1]
-  region = np.array([[box.x-3,        box.y], 
-                     [box.x-3,        box.y-text_height-26], 
-                     [box.x+text_width+13, box.y-text_height-26], 
-                     [box.x+text_width+13, box.y]], dtype='int32')
-  cv2.fillPoly(img=np.float32(image), pts=[region], color=label_colors[label_index])
-  cv2.putText(img=image, 
+  image = cv2.circle(image, (box.x, box.y), 2, (255, 0, 0), 2)
+  image = cv2.putText(img=image, 
               text=label_str, 
-              org=(box.x+13, box.y - 13), 
+              org=(box.x, box.y), 
               fontFace=cv2.FONT_HERSHEY_SIMPLEX, 
-              fontScale=1e-3 * image.size[0], 
-              color=(255,255,255), 
-              thickness=2)
+              fontScale=0.3, 
+              color=(0,0,0), 
+              thickness=1)
 
 
 def image_manupulate(input_path, output_path, desired_shape):

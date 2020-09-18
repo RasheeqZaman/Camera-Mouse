@@ -1,6 +1,8 @@
 
+import sys
 import tensorflow as tf
 import numpy as np
+np.set_printoptions(threshold=sys.maxsize)
 from keras.losses import MeanSquaredError, BinaryCrossentropy
 from keras.layers import Input, Conv2D, ZeroPadding2D, Add, UpSampling2D, Concatenate
 from keras.layers.advanced_activations import LeakyReLU
@@ -8,6 +10,7 @@ from keras.layers.normalization import BatchNormalization
 from keras.regularizers import l2
 from keras import backend as K
 from keras.models import Model
+from PIL import Image
 
 from utils import BoundBox, preprocess_image
 
@@ -131,10 +134,7 @@ def decode_netout(batch_output, image_index, net_shape, nms_thresh):
 
         grid_h, grid_w = netout.shape[:2]
 
-        netout[..., :2]  = tf.math.sigmoid(netout[..., :2])
-        netout[..., 2]   = tf.math.sigmoid(netout[..., 2])
-        netout[..., 3:]  = netout[..., 2][..., np.newaxis] * tf.nn.softmax(netout[..., 3:])
-        netout[..., 3:] *= netout[..., 3:] > nms_thresh
+        netout[..., :]  = tf.math.sigmoid(netout[..., :])
 
         for row in range(grid_w):
             for col in range(grid_h):
@@ -158,7 +158,7 @@ def decode_netout(batch_output, image_index, net_shape, nms_thresh):
     
     if len(boxes) <= 0 : return None
 
-    max_objectness_index = max(range(len(boxes)), key=lambda i: boxes[i].objectness)
+    max_objectness_index = max(range(len(boxes)), key=lambda i: (boxes[i].objectness, boxes[i].get_score()))
     return boxes[max_objectness_index]
 
 
@@ -166,28 +166,23 @@ def decode_netout(batch_output, image_index, net_shape, nms_thresh):
 def correct_yolo_boxes(box, image_shape):
     if box is None: return
 
-    box.x = image_shape[0]*box.x
-    box.y = image_shape[1]*box.y
+    box.x = int(image_shape[0]*box.x)
+    box.y = int(image_shape[1]*box.y)
 
 
 
-def get_yolo_boxes(model, images, net_shape, nms_thresh):
+def get_yolo_boxes(model, images, net_shape, nms_thresh, batch_output):
     nb_images = len(images)
-    batch_input = np.zeros((nb_images, net_shape[1], net_shape[0], 3))
 
-    # preprocess the input
-    for i in range(nb_images):
-        batch_input[i] = preprocess_image(images[i], net_shape)
-
-    batch_output = model.predict_on_batch(batch_input)
+    if batch_output is None: batch_output = model.predict_on_batch(images)
     batch_boxes  = []
 
     for i in range(nb_images):
         # decode the output of the network
         box = decode_netout(batch_output, i, net_shape, nms_thresh)
-
+        
         # correct the size of the bounding box
-        correct_yolo_boxes(box, images[i].size)
+        correct_yolo_boxes(box, images[i].shape)
 
         batch_boxes.append(box)
 
