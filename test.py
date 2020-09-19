@@ -29,6 +29,6 @@ model.load_weights(cfg.weights_path)
 
 detect_from_video(model, cfg.input_shape, cfg.nms_thresh, cfg.class_names)
 '''
-val_data_generator = data_generator(cfg.dataset[cfg.num_train:], cfg.input_shape, cfg.output_shapes, cfg.num_classes, cfg.image_extension)
+val_data_generator = data_generator(cfg.dataset[cfg.num_train:cfg.num_train+100], cfg.input_shape, cfg.output_shapes, cfg.num_classes, cfg.image_extension)
 detect_from_image_batches(model, val_data_generator[0], cfg.input_shape, cfg.nms_thresh, cfg.class_names, video_batches=False)
 '''

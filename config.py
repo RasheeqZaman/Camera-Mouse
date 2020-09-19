@@ -36,4 +36,4 @@ early_stopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, ver
 
 optimizer = Adam(learning_rate=optimizer_learning_rate)
 
-nms_thresh = 0.3
+nms_thresh = 0.7

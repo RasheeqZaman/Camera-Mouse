@@ -162,15 +162,6 @@ def decode_netout(batch_output, image_index, net_shape, nms_thresh):
     return boxes[max_objectness_index]
 
 
-
-def correct_yolo_boxes(box, image_shape):
-    if box is None: return
-
-    box.x = int(image_shape[0]*box.x)
-    box.y = int(image_shape[1]*box.y)
-
-
-
 def get_yolo_boxes(model, images, net_shape, nms_thresh, batch_output):
     nb_images = len(images)
 
@@ -180,9 +171,6 @@ def get_yolo_boxes(model, images, net_shape, nms_thresh, batch_output):
     for i in range(nb_images):
         # decode the output of the network
         box = decode_netout(batch_output, i, net_shape, nms_thresh)
-        
-        # correct the size of the bounding box
-        correct_yolo_boxes(box, images[i].shape)
 
         batch_boxes.append(box)
 

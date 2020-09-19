@@ -34,7 +34,7 @@ def preprocess_true_boxes(true_boxes, input_shape, output_shapes, num_classes):
       i = true_boxes[b,0]*output_shapes[l][0]
       j = true_boxes[b,1]*output_shapes[l][1]
       c = true_boxes[b,2].astype('int32')
-      if c == -1: continue
+      if c < 0: continue
 
       y_true[l][b, int(j), int(i), 0] = i - float(int(i))
       y_true[l][b, int(j), int(i), 1] = j - float(int(j))
@@ -91,8 +91,17 @@ class BoundBox:
         return self.score
 
 
+def correct_yolo_boxes(box, image_shape):
+    if box is None: return
+
+    box.x = int(image_shape[0]*box.x)
+    box.y = int(image_shape[1]*box.y)
+
+
 def draw_boxes(image, box, label_names):
   if box is None: return
+
+  correct_yolo_boxes(box, image.shape)
 
   label_index = box.get_label()
   label_str = str(label_index)+", "+"{:.2f}".format(box.objectness*100)+"%, "+"{:.2f}".format(box.get_score()*100)+"%"
@@ -102,9 +111,9 @@ def draw_boxes(image, box, label_names):
               text=label_str, 
               org=(box.x, box.y), 
               fontFace=cv2.FONT_HERSHEY_SIMPLEX, 
-              fontScale=0.3, 
+              fontScale=0.5, 
               color=(0,0,0), 
-              thickness=1)
+              thickness=2)
 
 
 def image_manupulate(input_path, output_path, desired_shape):

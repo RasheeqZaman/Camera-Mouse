@@ -36,5 +36,5 @@ def data_generator(dataset, input_shape, output_shape, num_classes, image_extens
     image_data = np.array(image_data)
     box_data = np.array(box_data)
     y_true = preprocess_true_boxes(box_data, input_shape, output_shape, num_classes)
-    
+
     return image_data, y_true

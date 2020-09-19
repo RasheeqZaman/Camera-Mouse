@@ -3,14 +3,21 @@ from PIL import Image
 from cv2 import cv2
 
 from yolov3 import get_yolo_boxes
+from mouse_control import MouseControl
 from utils import draw_boxes, preprocess_image
 
 def detect_from_image_batches(model, images, net_shape, nms_thresh, label_names, batch_output=None, video_batches=True):
     batch_boxes = get_yolo_boxes(model, images, net_shape, nms_thresh, batch_output)
+    mControl = MouseControl()
 
     for i in range(len(images)):
+        if video_batches:
+            if batch_boxes[i] is not None:
+                mControl.move_to(x=batch_boxes[i].x, y=batch_boxes[i].y)
+                
         draw_boxes(images[i], batch_boxes[i], label_names)
-        cv2.imshow('video with bboxes', images[i])
+        cv2.imshow('Mouse Position', images[i])
+         
         if not video_batches: cv2.waitKey(0)
     
     if not video_batches: cv2.destroyAllWindows()
