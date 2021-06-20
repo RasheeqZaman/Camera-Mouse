@@ -12,12 +12,12 @@ The software lets you:
 
 ## Screenshots
 
-[<img src="/readme/cm_ss1.png" align="left"
+[<img src="/readme/cm_ss1.PNG" align="left"
 width="200"
-    hspace="10" vspace="10">](/readme/cm_ss1.png)
-[<img src="/readme/cm_ss2.png" align="center"
+    hspace="10" vspace="10">](/readme/cm_ss1.PNG)
+[<img src="/readme/cm_ss2.PNG" align="center"
 width="200"
-    hspace="10" vspace="10">](/readme/cm_ss2.png)
-[<img src="/readme/cm_ss3.png" align="center"
+    hspace="10" vspace="10">](/readme/cm_ss2.PNG)
+[<img src="/readme/cm_ss3.PNG" align="center"
 width="200"
-    hspace="10" vspace="10">](/readme/cm_ss3.png)
+    hspace="10" vspace="10">](/readme/cm_ss3.PNG)
